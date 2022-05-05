@@ -1,6 +1,5 @@
 import requests
 import time
-import json
 import re
 
 HEADER1 = {
@@ -77,20 +76,33 @@ def sign(user, passwd):
                           data=data, headers=HEADER2)
         r.encoding = 'utf-8'
         print('sign return:', r.text)
-        return True
+        return u'成功' in r.text
     except Exception as e:
         print(f'Sign failed. Exception: {e}')
         return False
 
 
 if __name__ == '__main__':
+    already = set()
     while True:
-        while True:
-            res = sign('BX1816901', 'XXXX')
-            if res:
-                print('Succeed!')
-                break
-            else:
-                time.sleep(5)
-                print('Failed. Retry in 5 sec.')
-        time.sleep(60 * 60 * 12)
+        today = datetime.datetime.now()
+        tstr = f'{today.year}-{today.month}-{today.day}'
+        print(f'Checking {tstr}')
+        if tstr not in already:
+            print('Try to sign.')
+            tried = 0
+            succ = False
+            while tried < 5:
+                tried += 1
+                res = sign('SX1122333', 'XXXX')
+                if res:
+                    succ = True
+                    already.add(tstr)
+                    print('Succeed!')
+                    break
+                else:
+                    time.sleep(10)
+                    print('Failed. Retry in 10 sec.')
+            if not succ:
+                print('Failed. Retry in next hour.')
+        time.sleep(60 * 60)
